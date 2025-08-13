@@ -59,7 +59,7 @@ pipeline {
             steps {
                 // Wrap inside SonarQube environment
                 withSonarQubeEnv("${SONARQUBE_ENV}") {
-                    sh 'mvn sonar:sonar -Dsonar.projectKey=my-project-key -Dsonar.host.url=$SONAR_HOST_URL -Dsonar.login=$SONAR_AUTH_TOKEN'
+                    sh 'mvn sonar:sonar -Dsonar.projectKey=my-project-key -Dsonar.host.url=172.28.130.32:9000 -Dsonar.login=1190afc7e9d7e2e912031e663687ebe7c5'
                 }
             }
         }
