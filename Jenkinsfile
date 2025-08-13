@@ -17,7 +17,7 @@ pipeline {
         stage('Checkout') {
             steps {
                 echo "Cloning GitHub repo..."
-                git branch: 'main', url: 'https://github.com/shashi40410/simple-java-maven-app.git'
+                git branch: 'master', url: 'https://github.com/shashi40410/simple-java-maven-app.git'
             }
         }
 
