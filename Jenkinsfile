@@ -3,21 +3,24 @@ pipeline {
 
     tools {
         maven 'Maven_3.9.6'
-        // Optional: specify JDK if needed
-      //  jdk 'JDK_17'
+        // Using system-installed Java 17, so no jdk declaration needed
     }
 
     environment {
-        // Jenkins SonarQube server name configured in Jenkins global configuration
-        SONARQUBE_ENV = 'MySonarQube'
-
-        // Optional: SonarQube project properties
+        SONARQUBE_ENV = 'MySonarQube'           // Jenkins SonarQube server name
+        SONAR_PROJECT_KEY = 'jenkins-sonar-demo'
+        SONAR_PROJECT_NAME = 'Jenkins Sonar Demo'
         SONAR_HOST_URL = 'http://192.168.56.21:9000'
-        SONAR_PROJECT_KEY = 'my-project-key'
-        SONAR_PROJECT_NAME = 'My Project'
     }
 
     stages {
+        stage('Checkout') {
+            steps {
+                echo "Cloning GitHub repo..."
+                git url: 'https://github.com/shashi40410/simple-java-maven-app.git', branch: 'main'
+            }
+        }
+
         stage('Build') {
             steps {
                 echo "Building project..."
@@ -27,12 +30,12 @@ pipeline {
 
         stage('Test') { 
             steps {
-                echo "Running tests..."
+                echo "Running unit tests..."
                 sh 'mvn test'
             }
             post {
                 always {
-                    echo "Publishing test reports..."
+                    echo "Publishing test results..."
                     junit 'target/surefire-reports/*.xml'
                 }
             }
@@ -42,10 +45,13 @@ pipeline {
             steps {
                 echo "Running SonarQube analysis..."
                 withSonarQubeEnv("${SONARQUBE_ENV}") {
-                    sh "mvn sonar:sonar \
-                        -Dsonar.projectKey=${SONAR_PROJECT_KEY} \
-                        -Dsonar.projectName='${SONAR_PROJECT_NAME}' \
-                        -Dsonar.host.url=${SONAR_HOST_URL}"
+                    withCredentials([string(credentialsId: 'jenkins-sonar-demo', variable: 'SONAR_TOKEN')]) {
+                        sh "mvn sonar:sonar \
+                            -Dsonar.projectKey=${SONAR_PROJECT_KEY} \
+                            -Dsonar.projectName='${SONAR_PROJECT_NAME}' \
+                            -Dsonar.host.url=${SONAR_HOST_URL} \
+                            -Dsonar.login=${SONAR_TOKEN}"
+                    }
                 }
             }
         }
