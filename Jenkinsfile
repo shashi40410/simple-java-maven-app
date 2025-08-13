@@ -3,17 +3,24 @@ pipeline {
 
     tools {
         maven 'Maven_3.9.6'
-        // Using system-installed Java 17, so no jdk declaration needed
     }
 
     environment {
-        SONARQUBE_ENV = 'MySonarQube'           // Jenkins SonarQube server name
+        SONARQUBE_ENV = 'MySonarQube'           
         SONAR_PROJECT_KEY = 'jenkins-sonar-demo'
         SONAR_PROJECT_NAME = 'Jenkins Sonar Demo'
         SONAR_HOST_URL = 'http://192.168.56.21:9000'
     }
 
     stages {
+
+        stage('Clean Workspace') {
+            steps {
+                echo "Cleaning previous build workspace..."
+                deleteDir()   // deletes everything in the current workspace
+            }
+        }
+
         stage('Checkout') {
             steps {
                 echo "Cloning GitHub repo..."
@@ -79,6 +86,10 @@ pipeline {
         }
         failure {
             echo 'Pipeline failed!'
+        }
+        always {
+            echo "Cleaning workspace after build..."
+            deleteDir()   // cleanup again after the build
         }
     }
 }
